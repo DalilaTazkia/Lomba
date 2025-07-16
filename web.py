@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
+import matplotlib.pyplot as plt  # Mengganti Plotly dengan Matplotlib
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -54,6 +54,9 @@ st.markdown("""
         background-color: #f5f5f5;
         text-align: center;
         font-size: 12px;
+    }
+    .stDataFrame {
+        font-size: 14px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -114,10 +117,18 @@ if menu == "Beranda":
     st.markdown("<div class='subheader'>TREN EKONOMI 5 TAHUN TERAKHIR</div>", unsafe_allow_html=True)
     
     selected_indicator = st.selectbox("Pilih Indikator:", df.columns[1:])
-    fig = px.line(df, x="Tahun", y=selected_indicator, 
-                  title=f"Perkembangan {selected_indicator} 2018-2022",
-                  markers=True)
-    st.plotly_chart(fig, use_container_width=True)
+    
+    # Membuat grafik dengan Matplotlib
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(df["Tahun"], df[selected_indicator], marker='o', color='#0066cc', linewidth=2)
+    ax.set_title(f"Perkembangan {selected_indicator} (2018-2022)", pad=20)
+    ax.set_xlabel("Tahun")
+    ax.set_ylabel(selected_indicator)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    st.pyplot(fig)
 
 elif menu == "Statistik":
     st.markdown("<div class='subheader'>DATA STATISTIK</div>", unsafe_allow_html=True)
@@ -129,19 +140,26 @@ elif menu == "Statistik":
     
     with tab2:
         chart_type = st.selectbox("Jenis Visualisasi:", 
-                                ["Line Chart", "Bar Chart", "Scatter Plot"])
+                                ["Line Chart", "Bar Chart"])
         
         x_axis = st.selectbox("Sumbu X:", df.columns)
         y_axis = st.selectbox("Sumbu Y:", df.columns[1:], index=1)
         
+        fig, ax = plt.subplots(figsize=(10, 5))
+        
         if chart_type == "Line Chart":
-            fig = px.line(df, x=x_axis, y=y_axis)
-        elif chart_type == "Bar Chart":
-            fig = px.bar(df, x=x_axis, y=y_axis)
+            ax.plot(df[x_axis], df[y_axis], marker='o', color='#0066cc', linewidth=2)
         else:
-            fig = px.scatter(df, x=x_axis, y=y_axis)
+            ax.bar(df[x_axis], df[y_axis], color='#0066cc')
             
-        st.plotly_chart(fig, use_container_width=True)
+        ax.set_title(f"{chart_type} {y_axis} per {x_axis}", pad=20)
+        ax.set_xlabel(x_axis)
+        ax.set_ylabel(y_axis)
+        ax.grid(True, linestyle='--', alpha=0.7)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        st.pyplot(fig)
     
     with tab3:
         st.markdown("**Unduh Data Statistik**")
@@ -164,7 +182,12 @@ elif menu == "Publikasi":
         ],
         "Tahun": [2022, 2022, 2022, 2021],
         "Kategori": ["Umum", "Tenaga Kerja", "Perdagangan", "Sosial"],
-        "Link": ["#", "#", "#", "#"]
+        "Link": [
+            "https://www.bps.go.id/publication/2023",
+            "https://www.bps.go.id/publication/2022",
+            "https://www.bps.go.id/publication/2022",
+            "https://www.bps.go.id/publication/2021"
+        ]
     }
     pub_df = pd.DataFrame(pub_data)
     
