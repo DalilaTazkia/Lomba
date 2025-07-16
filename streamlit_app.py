@@ -1,133 +1,222 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+import plotly.express as px
 
 # Konfigurasi halaman
 st.set_page_config(
-    page_title="Aplikasi Solusi IT",
-    page_icon="💻",
-    layout="wide"
+    page_title="BPS Digital",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Data contoh
-data_kasus = pd.DataFrame({
-    "Kasus": [
-        "Aplikasi lambat", 
-        "Database error", 
-        "Server down", 
-        "Masalah jaringan"
-    ],
-    "Solusi": [
-        "Optimasi query, tambah RAM, caching",
-        "Periksa koneksi, backup data, repair table",
-        "Restart service, cek resource, scale up",
-        "Cek kabel, restart router, ganti ISP"
-    ],
-    "Tingkat Kesulitan": ["Sedang", "Tinggi", "Kritis", "Rendah"],
-    "Status": ["Teratasi", "Dalam Proses", "Belum", "Teratasi"]
-})
+# Data contoh (mock data)
+@st.cache_data
+def load_data():
+    data = {
+        "Tahun": [2018, 2019, 2020, 2021, 2022],
+        "PDRB (Triliun Rupiah)": [1500, 1600, 1650, 1700, 1800],
+        "Inflasi (%)": [3.2, 2.8, 1.6, 1.9, 2.5],
+        "Pengangguran (Juta)": [7.0, 6.8, 9.3, 8.5, 7.9],
+        "Ekspor (Miliar USD)": [180, 168, 163, 192, 232],
+        "Impor (Miliar USD)": [188, 173, 156, 177, 210]
+    }
+    return pd.DataFrame(data)
 
-data_teknologi = pd.DataFrame({
-    "Teknologi": ["Python", "Streamlit", "Pandas", "NumPy", "Scikit-learn"],
-    "Kategori": ["Bahasa", "Framework", "Library", "Library", "Library"],
-    "Popularitas": ["Sangat Populer", "Populer", "Sangat Populer", "Populer", "Populer"]
-})
+df = load_data()
 
-# Navigasi sidebar
-st.sidebar.title("Navigasi")
-menu = st.sidebar.radio("Pilih halaman:", 
-                        ["Beranda", "Kasus & Solusi", "Data Teknologi"])
+# CSS untuk styling
+st.markdown("""
+<style>
+    .header {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0066cc;
+        padding: 10px;
+        border-bottom: 2px solid #0066cc;
+    }
+    .subheader {
+        font-size: 18px;
+        font-weight: bold;
+        color: #0066cc;
+        margin-top: 20px;
+    }
+    .metric-box {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .footer {
+        margin-top: 50px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        text-align: center;
+        font-size: 12px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# Halaman Beranda
+# Header
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image("https://www.bps.go.id/assets/img/logo.png", width=100)
+with col2:
+    st.markdown("<div class='header'>BADAN PUSAT STATISTIK REPUBLIK INDONESIA</div>", unsafe_allow_html=True)
+    st.markdown("**Satu Data untuk Indonesia**")
+
+# Menu utama
+menu = st.sidebar.selectbox("MENU UTAMA", [
+    "Beranda", 
+    "Statistik", 
+    "Publikasi", 
+    "Tabel Dinamis",
+    "Tentang Kami"
+])
+
 if menu == "Beranda":
-    st.title("Selamat Datang di Aplikasi Solusi IT")
-    st.image("https://via.placeholder.com/800x200?text=Solusi+IT+Modern", use_column_width=True)
-    
     st.markdown("""
-    ## Tentang Aplikasi Ini
+    ## Selamat Datang di Portal BPS Digital
     
-    Aplikasi ini dibuat untuk membantu tim IT dalam menangani berbagai kasus teknis 
-    yang sering terjadi dalam pengembangan dan maintenance sistem.
-    
-    **Fitur utama:**
-    - Katalog kasus dan solusi IT
-    - Database pengetahuan teknologi
-    - Panduan troubleshooting terstruktur
-    
-    ### Cara Menggunakan
-    1. Pilih menu **Kasus & Solusi** untuk melihat daftar masalah umum
-    2. Cari solusi yang relevan dengan masalah Anda
-    3. Untuk data teknologi, buka menu **Data Teknologi**
+    Portal ini menyajikan berbagai data statistik resmi yang diproduksi oleh Badan Pusat Statistik.
     """)
     
-    st.success("🚀 Aplikasi siap membantu Anda menyelesaikan masalah teknis!")
+    # Highlight indikator
+    st.markdown("<div class='subheader'>INDIKATOR UTAMA</div>", unsafe_allow_html=True)
+    
+    cols = st.columns(4)
+    with cols[0]:
+        st.markdown("<div class='metric-box'>" +
+                    "<div>PDRB 2022</div>" +
+                    f"<div style='font-size:24px; font-weight:bold;'>Rp {df.loc[4, 'PDRB (Triliun Rupiah)']} T</div>" +
+                    "</div>", unsafe_allow_html=True)
+    
+    with cols[1]:
+        st.markdown("<div class='metric-box'>" +
+                    "<div>Inflasi 2022</div>" +
+                    f"<div style='font-size:24px; font-weight:bold;'>{df.loc[4, 'Inflasi (%)']}%</div>" +
+                    "</div>", unsafe_allow_html=True)
+    
+    with cols[2]:
+        st.markdown("<div class='metric-box'>" +
+                    "<div>Pengangguran 2022</div>" +
+                    f"<div style='font-size:24px; font-weight:bold;'>{df.loc[4, 'Pengangguran (Juta)']} Juta</div>" +
+                    "</div>", unsafe_allow_html=True)
+    
+    with cols[3]:
+        st.markdown("<div class='metric-box'>" +
+                    "<div>Ekspor 2022</div>" +
+                    f"<div style='font-size:24px; font-weight:bold;'>${df.loc[4, 'Ekspor (Miliar USD)']} M</div>" +
+                    "</div>", unsafe_allow_html=True)
+    
+    # Grafik tren
+    st.markdown("<div class='subheader'>TREN EKONOMI 5 TAHUN TERAKHIR</div>", unsafe_allow_html=True)
+    
+    selected_indicator = st.selectbox("Pilih Indikator:", df.columns[1:])
+    fig = px.line(df, x="Tahun", y=selected_indicator, 
+                  title=f"Perkembangan {selected_indicator} 2018-2022",
+                  markers=True)
+    st.plotly_chart(fig, use_container_width=True)
 
-# Halaman Kasus & Solusi
-elif menu == "Kasus & Solusi":
-    st.title("Kasus dan Solusi IT")
-    st.markdown("Berikut adalah daftar kasus umum beserta solusi yang direkomendasikan:")
+elif menu == "Statistik":
+    st.markdown("<div class='subheader'>DATA STATISTIK</div>", unsafe_allow_html=True)
     
-    # Tampilkan data
-    st.dataframe(data_kasus, use_container_width=True, hide_index=True)
+    tab1, tab2, tab3 = st.tabs(["Tabel Data", "Visualisasi", "Unduh Data"])
     
-    # Filter data
-    st.subheader("Filter Kasus")
-    col1, col2 = st.columns(2)
-    with col1:
-        tingkat_filter = st.multiselect(
-            "Filter berdasarkan tingkat kesulitan:",
-            options=data_kasus["Tingkat Kesulitan"].unique(),
-            default=data_kasus["Tingkat Kesulitan"].unique()
-        )
-    with col2:
-        status_filter = st.multiselect(
-            "Filter berdasarkan status:",
-            options=data_kasus["Status"].unique(),
-            default=data_kasus["Status"].unique()
-        )
+    with tab1:
+        st.dataframe(df, use_container_width=True)
     
-    # Terapkan filter
-    filtered_data = data_kasus[
-        (data_kasus["Tingkat Kesulitan"].isin(tingkat_filter)) & 
-        (data_kasus["Status"].isin(status_filter))
-    ]
-    
-    st.dataframe(filtered_data, use_container_width=True, hide_index=True)
-    
-    # Form tambah kasus baru
-    st.subheader("Tambahkan Kasus Baru")
-    with st.form("form_kasus_baru"):
-        kasus = st.text_input("Kasus/Masalah")
-        solusi = st.text_area("Solusi")
-        tingkat = st.selectbox("Tingkat Kesulitan", ["Rendah", "Sedang", "Tinggi", "Kritis"])
-        status = st.selectbox("Status", ["Belum", "Dalam Proses", "Teratasi"])
+    with tab2:
+        chart_type = st.selectbox("Jenis Visualisasi:", 
+                                ["Line Chart", "Bar Chart", "Scatter Plot"])
         
-        if st.form_submit_button("Simpan Kasus"):
-            new_case = pd.DataFrame([{
-                "Kasus": kasus,
-                "Solusi": solusi,
-                "Tingkat Kesulitan": tingkat,
-                "Status": status
-            }])
-            data_kasus = pd.concat([data_kasus, new_case], ignore_index=True)
-            st.success("Kasus berhasil ditambahkan!")
-            st.experimental_rerun()
+        x_axis = st.selectbox("Sumbu X:", df.columns)
+        y_axis = st.selectbox("Sumbu Y:", df.columns[1:], index=1)
+        
+        if chart_type == "Line Chart":
+            fig = px.line(df, x=x_axis, y=y_axis)
+        elif chart_type == "Bar Chart":
+            fig = px.bar(df, x=x_axis, y=y_axis)
+        else:
+            fig = px.scatter(df, x=x_axis, y=y_axis)
+            
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with tab3:
+        st.markdown("**Unduh Data Statistik**")
+        st.download_button(
+            label="Unduh sebagai CSV",
+            data=df.to_csv(index=False).encode('utf-8'),
+            file_name='data_statistik_bps.csv',
+            mime='text/csv'
+        )
 
-# Halaman Data Teknologi
-elif menu == "Data Teknologi":
-    st.title("Database Pengetahuan Teknologi")
-    st.markdown("Daftar teknologi yang relevan untuk pengembangan solusi IT:")
+elif menu == "Publikasi":
+    st.markdown("<div class='subheader'>PUBLIKASI RESMI</div>", unsafe_allow_html=True)
     
-    # Tampilkan data
-    st.dataframe(data_teknologi, use_container_width=True, hide_index=True)
+    pub_data = {
+        "Judul Publikasi": [
+            "Statistik Indonesia 2022",
+            "Indikator Pasar Tenaga Kerja 2022",
+            "Perkembangan Ekspor Impor 2022",
+            "Statistik Kesejahteraan Rakyat 2021"
+        ],
+        "Tahun": [2022, 2022, 2022, 2021],
+        "Kategori": ["Umum", "Tenaga Kerja", "Perdagangan", "Sosial"],
+        "Link": ["#", "#", "#", "#"]
+    }
+    pub_df = pd.DataFrame(pub_data)
     
-    # Statistik
-    st.subheader("Statistik Teknologi")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Total Teknologi", len(data_teknologi))
-    with col2:
-        populer_count = len(data_teknologi[data_teknologi["Popularitas"] == "Sangat Populer"])
-        st.metric("Teknologi Sangat Populer", populer_count)
+    st.dataframe(
+        pub_df,
+        column_config={
+            "Link": st.column_config.LinkColumn("Unduh")
+        },
+        hide_index=True,
+        use_container_width=True
+    )
+
+elif menu == "Tabel Dinamis":
+    st.markdown("<div class='subheader'>TABEL DINAMIS</div>", unsafe_allow_html=True)
     
-    # Grafik
-    st.bar_chart(data_teknologi["Kategori"].value_counts())
+    st.markdown("""
+    Fitur ini memungkinkan Anda untuk membuat tabel statistik custom sesuai kebutuhan.
+    """)
+    
+    selected_columns = st.multiselect(
+        "Pilih Kolom Data:",
+        df.columns,
+        default=["Tahun", "PDRB (Triliun Rupiah)", "Inflasi (%)"]
+    )
+    
+    if selected_columns:
+        st.dataframe(df[selected_columns], use_container_width=True)
+    else:
+        st.warning("Silakan pilih minimal satu kolom")
+
+elif menu == "Tentang Kami":
+    st.markdown("<div class='subheader'>TENTANG BPS DIGITAL</div>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    **Badan Pusat Statistik (BPS)** adalah Lembaga Pemerintah Non Kementerian 
+    yang bertanggung jawab langsung kepada Presiden.
+    
+    **Tugas Pokok:**
+    - Melaksanakan tugas pemerintahan di bidang statistik
+    - Menyediakan data statistik berkualitas
+    - Mengembangkan sistem statistik nasional
+    
+    **Kontak:**
+    - Email: bpshq@bps.go.id
+    - Telepon: (021) 3841195
+    - Alamat: Jl. Dr. Sutomo 6-8 Jakarta 10710 Indonesia
+    """)
+
+# Footer
+st.markdown("""
+<div class='footer'>
+    © 2023 Badan Pusat Statistik Republik Indonesia<br>
+    Seluruh data yang disajikan merupakan data resmi yang dipublikasikan oleh BPS
+</div>
+""", unsafe_allow_html=True)
