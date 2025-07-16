@@ -1,245 +1,71 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt  # Mengganti Plotly dengan Matplotlib
+import plotly.express as px
 
 # Konfigurasi halaman
 st.set_page_config(
-    page_title="BPS Digital",
+    page_title="Aplikasi Statistik - BPS",
     page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
-
-# Data contoh (mock data)
-@st.cache_data
-def load_data():
-    data = {
-        "Tahun": [2018, 2019, 2020, 2021, 2022],
-        "PDRB (Triliun Rupiah)": [1500, 1600, 1650, 1700, 1800],
-        "Inflasi (%)": [3.2, 2.8, 1.6, 1.9, 2.5],
-        "Pengangguran (Juta)": [7.0, 6.8, 9.3, 8.5, 7.9],
-        "Ekspor (Miliar USD)": [180, 168, 163, 192, 232],
-        "Impor (Miliar USD)": [188, 173, 156, 177, 210]
-    }
-    return pd.DataFrame(data)
-
-df = load_data()
 
 # CSS untuk styling
 st.markdown("""
-<style>
+    <style>
+    .main {
+        background-color: #f5f5f5;
+    }
     .header {
+        color: #0066cc;
         font-size: 24px;
         font-weight: bold;
-        color: #0066cc;
-        padding: 10px;
-        border-bottom: 2px solid #0066cc;
     }
     .subheader {
-        font-size: 18px;
-        font-weight: bold;
         color: #0066cc;
-        margin-top: 20px;
+        font-size: 18px;
     }
-    .metric-box {
-        background-color: #f0f8ff;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .footer {
-        margin-top: 50px;
-        padding: 10px;
-        background-color: #f5f5f5;
-        text-align: center;
-        font-size: 12px;
-    }
-    .stDataFrame {
-        font-size: 14px;
-    }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
 # Header
-col1, col2 = st.columns([1, 4])
-with col1:
-    st.image("https://www.bps.go.id/assets/img/logo.png", width=100)
-with col2:
-    st.markdown("<div class='header'>BADAN PUSAT STATISTIK REPUBLIK INDONESIA</div>", unsafe_allow_html=True)
-    st.markdown("**Satu Data untuk Indonesia**")
+st.image("https://www.bps.go.id/assets/img/logo.png", width=150)
+st.title("Badan Pusat Statistik Republik Indonesia")
+st.markdown("---")
 
-# Menu utama
-menu = st.sidebar.selectbox("MENU UTAMA", [
-    "Beranda", 
-    "Statistik", 
-    "Publikasi", 
-    "Tabel Dinamis",
-    "Tentang Kami"
-])
+# Menu sidebar
+with st.sidebar:
+    st.header("Menu")
+    menu_option = st.selectbox(
+        "Pilih Kategori Data",
+        ["Ekonomi", "Sosial", "Pertanian", "Perdagangan", "Lainnya"]
+    )
+    tahun = st.slider("Pilih Tahun", 2010, 2023, 2023)
 
-if menu == "Beranda":
-    st.markdown("""
-    ## Selamat Datang di Portal BPS Digital
-    
-    Portal ini menyajikan berbagai data statistik resmi yang diproduksi oleh Badan Pusat Statistik.
-    """)
-    
-    # Highlight indikator
-    st.markdown("<div class='subheader'>INDIKATOR UTAMA</div>", unsafe_allow_html=True)
-    
-    cols = st.columns(4)
-    with cols[0]:
-        st.markdown("<div class='metric-box'>" +
-                    "<div>PDRB 2022</div>" +
-                    f"<div style='font-size:24px; font-weight:bold;'>Rp {df.loc[4, 'PDRB (Triliun Rupiah)']} T</div>" +
-                    "</div>", unsafe_allow_html=True)
-    
-    with cols[1]:
-        st.markdown("<div class='metric-box'>" +
-                    "<div>Inflasi 2022</div>" +
-                    f"<div style='font-size:24px; font-weight:bold;'>{df.loc[4, 'Inflasi (%)']}%</div>" +
-                    "</div>", unsafe_allow_html=True)
-    
-    with cols[2]:
-        st.markdown("<div class='metric-box'>" +
-                    "<div>Pengangguran 2022</div>" +
-                    f"<div style='font-size:24px; font-weight:bold;'>{df.loc[4, 'Pengangguran (Juta)']} Juta</div>" +
-                    "</div>", unsafe_allow_html=True)
-    
-    with cols[3]:
-        st.markdown("<div class='metric-box'>" +
-                    "<div>Ekspor 2022</div>" +
-                    f"<div style='font-size:24px; font-weight:bold;'>${df.loc[4, 'Ekspor (Miliar USD)']} M</div>" +
-                    "</div>", unsafe_allow_html=True)
-    
-    # Grafik tren
-    st.markdown("<div class='subheader'>TREN EKONOMI 5 TAHUN TERAKHIR</div>", unsafe_allow_html=True)
-    
-    selected_indicator = st.selectbox("Pilih Indikator:", df.columns[1:])
-    
-    # Membuat grafik dengan Matplotlib
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(df["Tahun"], df[selected_indicator], marker='o', color='#0066cc', linewidth=2)
-    ax.set_title(f"Perkembangan {selected_indicator} (2018-2022)", pad=20)
-    ax.set_xlabel("Tahun")
-    ax.set_ylabel(selected_indicator)
-    ax.grid(True, linestyle='--', alpha=0.7)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    
-    st.pyplot(fig)
-
-elif menu == "Statistik":
-    st.markdown("<div class='subheader'>DATA STATISTIK</div>", unsafe_allow_html=True)
-    
-    tab1, tab2, tab3 = st.tabs(["Tabel Data", "Visualisasi", "Unduh Data"])
-    
-    with tab1:
-        st.dataframe(df, use_container_width=True)
-    
-    with tab2:
-        chart_type = st.selectbox("Jenis Visualisasi:", 
-                                ["Line Chart", "Bar Chart"])
-        
-        x_axis = st.selectbox("Sumbu X:", df.columns)
-        y_axis = st.selectbox("Sumbu Y:", df.columns[1:], index=1)
-        
-        fig, ax = plt.subplots(figsize=(10, 5))
-        
-        if chart_type == "Line Chart":
-            ax.plot(df[x_axis], df[y_axis], marker='o', color='#0066cc', linewidth=2)
-        else:
-            ax.bar(df[x_axis], df[y_axis], color='#0066cc')
-            
-        ax.set_title(f"{chart_type} {y_axis} per {x_axis}", pad=20)
-        ax.set_xlabel(x_axis)
-        ax.set_ylabel(y_axis)
-        ax.grid(True, linestyle='--', alpha=0.7)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        
-        st.pyplot(fig)
-    
-    with tab3:
-        st.markdown("**Unduh Data Statistik**")
-        st.download_button(
-            label="Unduh sebagai CSV",
-            data=df.to_csv(index=False).encode('utf-8'),
-            file_name='data_statistik_bps.csv',
-            mime='text/csv'
-        )
-
-elif menu == "Publikasi":
-    st.markdown("<div class='subheader'>PUBLIKASI RESMI</div>", unsafe_allow_html=True)
-    
-    pub_data = {
-        "Judul Publikasi": [
-            "Statistik Indonesia 2022",
-            "Indikator Pasar Tenaga Kerja 2022",
-            "Perkembangan Ekspor Impor 2022",
-            "Statistik Kesejahteraan Rakyat 2021"
-        ],
-        "Tahun": [2022, 2022, 2022, 2021],
-        "Kategori": ["Umum", "Tenaga Kerja", "Perdagangan", "Sosial"],
-        "Link": [
-            "https://www.bps.go.id/publication/2023",
-            "https://www.bps.go.id/publication/2022",
-            "https://www.bps.go.id/publication/2022",
-            "https://www.bps.go.id/publication/2021"
-        ]
+# Konten utama berdasarkan menu
+if menu_option == "Ekonomi":
+    st.header("Data Ekonomi")
+    data = {
+        "Bulan": ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"],
+        "Inflasi (%)": [2.5, 2.7, 2.8, 2.6, 2.4, 2.3],
+        "Pertumbuhan Ekonomi (%)": [5.1, 5.2, 5.0, 4.9, 5.1, 5.3]
     }
-    pub_df = pd.DataFrame(pub_data)
+    df = pd.DataFrame(data)
     
-    st.dataframe(
-        pub_df,
-        column_config={
-            "Link": st.column_config.LinkColumn("Unduh")
-        },
-        hide_index=True,
-        use_container_width=True
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Tabel Data")
+        st.dataframe(df)
+    
+    with col2:
+        st.subheader("Grafik Inflasi")
+        fig = px.line(df, x="Bulan", y="Inflasi (%)", title="Inflasi Bulanan")
+        st.plotly_chart(fig, use_container_width=True)
 
-elif menu == "Tabel Dinamis":
-    st.markdown("<div class='subheader'>TABEL DINAMIS</div>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    Fitur ini memungkinkan Anda untuk membuat tabel statistik custom sesuai kebutuhan.
-    """)
-    
-    selected_columns = st.multiselect(
-        "Pilih Kolom Data:",
-        df.columns,
-        default=["Tahun", "PDRB (Triliun Rupiah)", "Inflasi (%)"]
-    )
-    
-    if selected_columns:
-        st.dataframe(df[selected_columns], use_container_width=True)
-    else:
-        st.warning("Silakan pilih minimal satu kolom")
-
-elif menu == "Tentang Kami":
-    st.markdown("<div class='subheader'>TENTANG BPS DIGITAL</div>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    **Badan Pusat Statistik (BPS)** adalah Lembaga Pemerintah Non Kementerian 
-    yang bertanggung jawab langsung kepada Presiden.
-    
-    **Tugas Pokok:**
-    - Melaksanakan tugas pemerintahan di bidang statistik
-    - Menyediakan data statistik berkualitas
-    - Mengembangkan sistem statistik nasional
-    
-    **Kontak:**
-    - Email: bpshq@bps.go.id
-    - Telepon: (021) 3841195
-    - Alamat: Jl. Dr. Sutomo 6-8 Jakarta 10710 Indonesia
-    """)
+elif menu_option == "Sosial":
+    st.header("Data Sosial")
+    # Tambahkan konten untuk data sosial di sini
+    st.write("Data kependudukan, kemiskinan, dll.")
 
 # Footer
-st.markdown("""
-<div class='footer'>
-    © 2023 Badan Pusat Statistik Republik Indonesia<br>
-    Seluruh data yang disajikan merupakan data resmi yang dipublikasikan oleh BPS
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("© 2023 Badan Pusat Statistik - Aplikasi Streamlit")
