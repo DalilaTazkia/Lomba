@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -9,21 +8,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# CSS untuk styling
+# CSS sederhana
 st.markdown("""
     <style>
-    .main {
-        background-color: #f5f5f5;
-    }
-    .header {
-        color: #0066cc;
-        font-size: 24px;
-        font-weight: bold;
-    }
-    .subheader {
-        color: #0066cc;
-        font-size: 18px;
-    }
+    .header { color: #0066cc; font-size: 24px; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -37,17 +25,17 @@ with st.sidebar:
     st.header("Menu")
     menu_option = st.selectbox(
         "Pilih Kategori Data",
-        ["Ekonomi", "Sosial", "Pertanian", "Perdagangan", "Lainnya"]
+        ["Ekonomi", "Sosial", "Pertanian", "Perdagangan"]
     )
     tahun = st.slider("Pilih Tahun", 2010, 2023, 2023)
 
-# Konten utama berdasarkan menu
+# Konten utama
 if menu_option == "Ekonomi":
     st.header("Data Ekonomi")
     data = {
         "Bulan": ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"],
         "Inflasi (%)": [2.5, 2.7, 2.8, 2.6, 2.4, 2.3],
-        "Pertumbuhan Ekonomi (%)": [5.1, 5.2, 5.0, 4.9, 5.1, 5.3]
+        "Pertumbuhan (%)": [5.1, 5.2, 5.0, 4.9, 5.1, 5.3]
     }
     df = pd.DataFrame(data)
     
@@ -58,14 +46,12 @@ if menu_option == "Ekonomi":
     
     with col2:
         st.subheader("Grafik Inflasi")
-        fig = px.line(df, x="Bulan", y="Inflasi (%)", title="Inflasi Bulanan")
-        st.plotly_chart(fig, use_container_width=True)
+        st.line_chart(df, x="Bulan", y="Inflasi (%)")
 
 elif menu_option == "Sosial":
     st.header("Data Sosial")
-    # Tambahkan konten untuk data sosial di sini
-    st.write("Data kependudukan, kemiskinan, dll.")
+    st.write("Data kependudukan akan ditampilkan di sini")
 
 # Footer
 st.markdown("---")
-st.markdown("© 2023 Badan Pusat Statistik - Aplikasi Streamlit")
+st.caption("© 2023 Aplikasi Statistik - Dibuat dengan Streamlit")
